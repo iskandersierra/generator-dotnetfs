@@ -1,0 +1,25 @@
+{
+  "name": "generator-dotnetfs",
+  "version": "0.1.0",
+  "description": "Generate a new dotnet classlib with F#, XUnit and build/publish scripts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iskandersierra/generator-dotnetfs.git"
+  },
+  "keywords": [
+    "yeaoman",
+    "generator",
+    "dotnet",
+    "fsharp"
+  ],
+  "author": "Iskander Sierra",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iskandersierra/generator-dotnetfs/issues"
+  },
+  "homepage": "https://github.com/iskandersierra/generator-dotnetfs#readme"
+}
