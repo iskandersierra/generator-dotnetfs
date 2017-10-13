@@ -1,0 +1,1 @@
+start "My ASP.NET App" /D Host ..\scripts\priv\run-dev.bat

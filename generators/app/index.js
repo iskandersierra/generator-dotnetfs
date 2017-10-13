@@ -1,72 +1,75 @@
-var Gen = require('yeoman-generator');
+var Generator = require('yeoman-generator');
+var child_process = require('child_process');
 
-module.exports = class extends Gen {
+module.exports = class extends Generator {
 
   constructor(args, opts) {
     super(args, opts);
+    this.answers = {};
   }
 
   initializing() {
-    this.log("initializing");
   }
 
   prompting() {
-    this.log("prompting");
-    return this.prompt([{
-      type    : 'input',
-      name    : 'aninput',
-      message : 'An input'
-    }, {
-      type    : 'confirm',
-      name    : 'aconfirm',
-      message : 'A confirm',
-    }, {
-      type    : 'list',
-      name    : 'alist',
-      message : 'A list',
-      choices : ["Option #1", "Option #2", "Option #3"],
-    }, {
-      type    : 'password',
-      name    : 'apassword',
-      message : 'A password',
-    }, {
-      type    : 'editor',
-      name    : 'aeditor',
-      message : 'A editor',
-    }, {
-      type    : 'rawlist',
-      name    : 'arawlist',
-      message : 'A rawlist',
-      choices : ["Option #1", "Option #2", "Option #3"],
-    }]).then((answers) => {
-      this.log('Answers', JSON.stringify(answers));
-    });
+    return this
+      .prompt([{
+        name: "slnname",
+        type: "input",
+        message: "Solution name",
+        store: true,
+        validate: (v) => {
+          if (v && v.match("[A-Za-z0-9\\-]+(\\.[A-Za-z0-9\\-]+)*")){
+            return true;
+          } else {
+            return "Solution name must be of the form <Name>(.<Name>)*"
+          }
+        }
+      }, {
+        name: "initialcommit",
+        type: "input",
+        message: "Initial commit message",
+        default: "Initial commit",
+        store: true,
+      }, {
+        name: "gitremote",
+        type: "input",
+        message: "Git remote repository",
+        default: "<none>",
+        store: false,
+      }]).then(answers => this.answers = answers);
   }
 
   configuring() {
-    this.log("configuring");
+    if (this.answers.slnname.endsWith(".sln")) {
+      this.answers.slnname =
+        this.answers.slnname.substring(this.answers.slnname.length - 4);
+    }
   }
 
   default() {
-    this.log("default");
-    return new Promise((resolve, reject) => {
-      setTimeout(() => resolve(), 1000);
-    });
   }
 
   writing() {
-    this.log("writing");
-  }
-
-  conflicts() {
-    this.log("conflicts");
+    this.fs.copy(
+      this.templatePath("copy"),
+      this.destinationPath()
+    );
   }
 
   install() {
-    this.log("install");
+    this.spawnCommandSync(
+      "dotnet", 
+      [
+        "new", "sln",
+        "--output", ".",
+        "--name", this.answers.slnname,
+      ]
+    );
+
+    this.spawnCommandSync("git", [ "init", ]);
   }
 
   end() {
-    this.log("end");
   }
 }

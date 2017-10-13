@@ -1,0 +1,9 @@
+# Build artifacts
+[Oo]bj/
+[Bb]in/
+
+# Visual Studio artifacts
+/.vs/
+
+# NCrunch artifacts
+/_NCrunch*/
