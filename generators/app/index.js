@@ -4,7 +4,6 @@ module.exports = class extends Generator {
 
   constructor(args, opts) {
     super(args, opts);
-    this.answers = {};
   }
 
   initializing() {
@@ -18,28 +17,36 @@ module.exports = class extends Generator {
         message: "Solution name",
         store: true,
         validate: (v) => {
-          if (v && v.match("[A-Za-z0-9\\-]+(\\.[A-Za-z0-9\\-]+)*")){
-            return true;
-          } else {
-            return "Solution name must be of the form <Name>(.<Name>)*"
+            if (v && v.match("[A-Za-z0-9\\-]+(\\.[A-Za-z0-9\\-]+)*")){
+              return true;
+            } else {
+              return "Solution name must be of the form <Name>(.<Name>)*"
+            }
           }
-        }
-      }, {
-        name: "initialcommit",
-        type: "input",
-        message: "Initial commit message",
-        default: "Initial commit",
-        store: false,
-      }, {
-        name: "gitremote",
-        type: "input",
-        message: "Git remote repository",
-        default: "<none>",
-        store: false,
-      }]).then(answers => {
+        }, {
+          name: "initialcommit",
+          type: "input",
+          message: "Initial commit message",
+          default: "Initial commit",
+          store: false,
+        }, {
+          name: "gitremote",
+          type: "input",
+          message: "Git remote repository",
+          default: "<none>",
+          store: false,
+        }, {
+          name: "pushtoorigin",
+          type: "confirm",
+          message: "Push to origin",
+          default: false,
+          store: true,
+        }])
+      .then(answers => {
         this.slnname = answers.slnname;
         this.initialcommit = answers.initialcommit;
         this.gitremote = answers.gitremote;
+        this.pushtoorigin = answers.pushtoorigin;
         if (this.slnname.endsWith(".sln")) {
           this.slnname =
             this.slnname.substring(this.slnname.length - 4);
@@ -63,6 +70,10 @@ module.exports = class extends Generator {
       this.templatePath("copy"),
       this.destinationPath()
     );
+    this.fs.copy(
+      this.templatePath("copy/.gitignore"),
+      this.destinationPath(".gitignore")
+    );
   }
 
   install() {
@@ -82,8 +93,10 @@ module.exports = class extends Generator {
       this.spawnCommandSync("git", 
         [ "remote", "add", "origin", this.gitremote ]);
 
-      this.spawnCommandSync("git", 
-        [ "push", "-u", "origin", "--all" ]);
+      if (this.pushtoorigin) {
+        this.spawnCommandSync("git", 
+          [ "push", "-u", "origin", "--all" ]);
+      }
     }
   }
 
