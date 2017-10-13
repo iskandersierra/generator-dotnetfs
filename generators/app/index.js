@@ -1,5 +1,4 @@
 var Generator = require('yeoman-generator');
-var child_process = require('child_process');
 
 module.exports = class extends Generator {
 
@@ -30,21 +29,30 @@ module.exports = class extends Generator {
         type: "input",
         message: "Initial commit message",
         default: "Initial commit",
-        store: true,
+        store: false,
       }, {
         name: "gitremote",
         type: "input",
         message: "Git remote repository",
         default: "<none>",
         store: false,
-      }]).then(answers => this.answers = answers);
+      }]).then(answers => {
+        this.slnname = answers.slnname;
+        this.initialcommit = answers.initialcommit;
+        this.gitremote = answers.gitremote;
+        if (this.slnname.endsWith(".sln")) {
+          this.slnname =
+            this.slnname.substring(this.slnname.length - 4);
+        }
+        if (!this.gitremote || this.gitremote === "<none>") {
+          this.gitremote = null;
+        }
+      });
   }
 
   configuring() {
-    if (this.answers.slnname.endsWith(".sln")) {
-      this.answers.slnname =
-        this.answers.slnname.substring(this.answers.slnname.length - 4);
-    }
+    this.config.set("slnname", this.slnname);
+    this.config.save();
   }
 
   default() {
@@ -58,16 +66,25 @@ module.exports = class extends Generator {
   }
 
   install() {
-    this.spawnCommandSync(
-      "dotnet", 
-      [
-        "new", "sln",
-        "--output", ".",
-        "--name", this.answers.slnname,
-      ]
-    );
+    this.spawnCommandSync("dotnet", 
+      [ "new", "sln", "--output", ".", "--name", this.slnname ]);
 
-    this.spawnCommandSync("git", [ "init", ]);
+    this.spawnCommandSync("git", 
+      [ "init", ]);
+
+    this.spawnCommandSync("git", 
+      [ "add", "-A", "--", "." ]);
+
+    this.spawnCommandSync("git", 
+      [ "commit", "-m", this.initialcommit ]);
+
+    if (this.gitremote) {
+      this.spawnCommandSync("git", 
+        [ "remote", "add", "origin", this.gitremote ]);
+
+      this.spawnCommandSync("git", 
+        [ "push", "-u", "origin", "--all" ]);
+    }
   }
 
   end() {
