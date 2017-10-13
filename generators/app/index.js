@@ -45,6 +45,10 @@ module.exports = class extends Generator {
       this.answers.slnname =
         this.answers.slnname.substring(this.answers.slnname.length - 4);
     }
+
+    if (!this.answers.initialcommit) {
+      this.answers.initialcommit = "Initial commit";
+    }
   }
 
   default() {
@@ -68,6 +72,36 @@ module.exports = class extends Generator {
     );
 
     this.spawnCommandSync("git", [ "init", ]);
+
+    this.spawnCommandSync("git", [ "add", "-A", "--", "." ]);
+
+    this.spawnCommandSync(
+      "git", 
+      [
+        "commit",
+        "-m", this.answers.initialcommit,
+      ]
+    );
+
+    if (this.answers.gitremote !== "<none>") {
+      this.spawnCommandSync(
+        "git", 
+        [
+          "remote", "add", "origin",
+          this.answers.gitremote,
+        ]
+      );
+
+      this.spawnCommandSync(
+        "git", 
+        [
+          "push", 
+          "-u", "origin",
+          "--all",
+        ]
+      );
+    }
+
   }
 
   end() {
