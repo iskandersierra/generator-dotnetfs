@@ -1,5 +1,4 @@
 var Generator = require('yeoman-generator');
-var child_process = require('child_process');
 
 module.exports = class extends Generator {
 
@@ -30,25 +29,35 @@ module.exports = class extends Generator {
         type: "input",
         message: "Initial commit message",
         default: "Initial commit",
-        store: true,
+        store: false,
       }, {
         name: "gitremote",
         type: "input",
         message: "Git remote repository",
         default: "<none>",
         store: false,
-      }]).then(answers => this.answers = answers);
+      }]).then(answers => {
+        this.log("Answers: " + JSON.stringify(answers));
+        for(var key in Object.keys(answers)) {
+          this.config.set(key, answers[key]);
+        }
+      });
   }
 
   configuring() {
-    if (this.answers.slnname.endsWith(".sln")) {
-      this.answers.slnname =
-        this.answers.slnname.substring(this.answers.slnname.length - 4);
+    this.log("Config: " + JSON.stringify(this.config));
+    var slnname = this.config.get("slnname");
+    var initialcommit = this.config.get("initialcommit");
+
+    if (slnname.endsWith(".sln")) {
+      this.set("slnname", slnname.substring(slnname.length - 4));
     }
 
-    if (!this.answers.initialcommit) {
-      this.answers.initialcommit = "Initial commit";
+    if (!initialcommit) {
+      this.config.set("initialcommit", "Initial commit");
     }
+
+    this.config.save();
   }
 
   default() {
@@ -62,12 +71,17 @@ module.exports = class extends Generator {
   }
 
   install() {
+    this.log("Config: " + JSON.stringify(this.config));
+    var slnname = this.config.get("slnname");
+    var initialcommit = this.config.get("initialcommit");
+    var gitremote = this.config.get("gitremote");
+    
     this.spawnCommandSync(
       "dotnet", 
       [
         "new", "sln",
         "--output", ".",
-        "--name", this.answers.slnname,
+        "--name", slnname,
       ]
     );
 
@@ -79,16 +93,16 @@ module.exports = class extends Generator {
       "git", 
       [
         "commit",
-        "-m", this.answers.initialcommit,
+        "-m", initialcommit,
       ]
     );
 
-    if (this.answers.gitremote !== "<none>") {
+    if (gitremote !== "<none>") {
       this.spawnCommandSync(
         "git", 
         [
           "remote", "add", "origin",
-          this.answers.gitremote,
+          gitremote,
         ]
       );
 
