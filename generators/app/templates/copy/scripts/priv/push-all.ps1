@@ -1,5 +1,5 @@
 Param (
-  $nugetSource = "nuget.org",
+  $NugetSource = "nuget.org",
   [switch]$WhatIf
 )
 
@@ -15,7 +15,7 @@ ForEach ($projFile in $projsFiles)
   $nupkgFileName = Join-Path $projDir "bin\Release\$packageId.$packageVersion.nupkg"
   If (Test-Path $nupkgFileName)
   {
-    $results = nuget list $packageId -Prerelease -Source $nugetSource
+    $results = nuget list $packageId -Prerelease -Source $NugetSource
     $currentVersion = ""
     ForEach ($line in $results)
     {
@@ -33,20 +33,20 @@ ForEach ($projFile in $projsFiles)
 
     if ($currentVersion -eq "")
     {
-      Write-Host "Publishing $packageId@$packageVersion for the first time to $nugetSource ..." -ForegroundColor Green
+      Write-Host "Publishing $packageId@$packageVersion for the first time to $NugetSource ..." -ForegroundColor Green
     }
     elseif ($currentVersion -eq $packageVersion)
     {
-      Write-Host "Package $packageId@$packageVersion is already published at $nugetSource" -ForegroundColor DarkYellow
+      Write-Host "Package $packageId@$packageVersion is already published at $NugetSource" -ForegroundColor DarkYellow
       Continue
     }
     else
     {
-      Write-Host "Publishing $packageId@$packageVersion over version $currentVersion to $nugetSource ..." -ForegroundColor Green
+      Write-Host "Publishing $packageId@$packageVersion over version $currentVersion to $NugetSource ..." -ForegroundColor Green
     }
     if (-not $WhatIf)
     {
-      dotnet nuget push -s "$nugetSource" "$nupkgFileName"
+      dotnet nuget push -s "$NugetSource" "$nupkgFileName"
       Write-Host "Success!" -ForegroundColor Green
     }
     else
