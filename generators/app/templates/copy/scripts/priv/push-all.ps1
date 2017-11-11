@@ -1,5 +1,5 @@
 Param (
-  $NugetSource = "nuget.org",
+  $NugetSource = "https://www.nuget.org/api/v2/package",
   [switch]$WhatIf
 )
 
